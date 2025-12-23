@@ -1,6 +1,24 @@
 # Coucou Garance !
 
-Je t'explique rapidement ce qui correspond à quoi dans ce projet.
+Je t'explique rapidement ce qui correspond à quoi dans ce projet et les deux trois trucs à faire.
+
+Initialiser le projet
+---------------------
+
+Déjà tu vas soit créer une branche `garance` et tu l'initialise à partir de cette branche `diego`, soit `pull` (écraser) cette branche sur le main. Je te recommande fortement la première option.
+Ensuite tu vas ouvrir vscode avec ce projet et dans le terminal tu executes la commande suivante:
+```
+npm install
+```
+Normalement tu devrais avoir un nouveau dossier `node_modules` dans ton architecture de projet (si tu as des galères reviens vers moi).
+
+Maintenant pour lancer le projet tu executes: 
+```
+npm run dev
+```
+
+Tu devrais obtenir un lien localhost que tu copies-colles dans ton navigateur et c'est bon tu devrais apercevoir ton travail !
+
 
 L'architecture
 --------------
