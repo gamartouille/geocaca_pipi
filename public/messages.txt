@@ -1,0 +1,15 @@
+A;0;Aaah les salles d'anglais et d'allemand...
+A;1;Au nez et à la barbe de Tantôt (pas à ses cheveux par contre)
+A;2;Tu viens chercher un stage chez Delphine ou chier un étron à l'admin ?
+A;3;"DO YOU GUYS UNDERSTAND ?" (Dédicace à Aline)
+A;4;HEROÏQUE, DERANGEMENT DU SAINT GRAAL PATOCHE SILLARD
+B;0;Entre 2 insultes de Quentin Bouillaguet envers le tableau, la table et ta daronne, petite pause pour se réchauffer les miches dans le seul endroit chauffé de cette putain d'aile
+B;1;
+B;2;T'as le cœur accroché vu l'odeur de vieille schnek que y a là-dedans
+B;3;On vous voit les TSI, ça vient vous enfumer devant chez vous
+B;4;Victor Coindet is watching you
+C;0;Anonymous
+C;1;Attention ce n'est pas anonyme, tout le monde va bientôt savoir que t'as chié là chatoune
+C;2;Petite pause cacouze au milieu d'un partiel de géodésie (de merde a fortiori)
+C;3;
+C;4;La classico, au carrefour de plusieurs générations, toujours agréable
