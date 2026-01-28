@@ -3,6 +3,7 @@ A;1;Au nez et à la barbe de Tantôt (pas à ses cheveux par contre)
 A;2;Tu viens chercher un stage chez Delphine ou chier un étron à l'admin ?
 A;3;"DO YOU GUYS UNDERSTAND ?" (Dédicace à Aline)
 A;4;HEROÏQUE, DERANGEMENT DU SAINT GRAAL PATOCHE SILLARD
+RDC;-1;Avec les vomitos des soirées fosses
 B;0;Entre 2 insultes de Quentin Bouillaguet envers le tableau, la table et ta daronne, petite pause pour se réchauffer les miches dans le seul endroit chauffé de cette putain d'aile
 B;1;
 B;2;T'as le cœur accroché vu l'odeur de vieille schnek que y a là-dedans

@@ -1,18 +1,7 @@
 <template>
   <div id="info">
-    <h2>🏫 Géodata Paris (ex ENSG)</h2>
-    <p><strong>6-8 Avenue Blaise Pascal</strong></p>
-    <p>Cité Descartes, Champs-sur-Marne</p>
-    <p style="margin-top: 10px; font-size: 11px;">
-      Architecture: Chaix & Morel (1997)<br />
-      Bâtiment partagé avec l'École des Ponts
-    </p>
-    <p style="margin-top: 10px; font-size: 11px;">
-      <strong>Géodata (Ouest) :</strong> 3 ailes Cassini<br />
-      <strong>École des Ponts (Est) :</strong> 3 ailes Belgrand
-    </p>
     <p style="margin-top: 10px; color: #ffd700;">
-      💡 Survolez et cliquez sur les étages !
+      Cliquez sur l'étage où vous avez posé la pêche !
     </p>
   </div>
 </template>

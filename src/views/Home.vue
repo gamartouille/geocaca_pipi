@@ -1,16 +1,13 @@
 <template>
   <main class="home">
-    <h1>Bienvenue à l'école</h1>
-    <p>
-      Bienvenue sur la visite 3D de l'école. Entre ton pseudo ci-dessous pour commencer
-      la visite. Le pseudo sera conservé localement pour les prochaines visites.
-    </p>
+    <h1>Bienvenue dans les toilettes de GéocacaPipi</h1>
 
     <form @submit.prevent="enterSite" class="form">
-      <label for="nick">Ton pseudo</label>
-      <input id="nick" v-model="nick" required maxlength="30" placeholder="ex : Garance" />
+      <label for="nick">Ton pseudo de pooper</label>
+      <input id="nick" v-model="nick" required maxlength="30" placeholder="ex : Bastien DoucheDoré, Clara Crotte, Nell Caca, Louise Goupet, Mathéo Rendsmoitoncaca,..." />
 
-      <button type="submit">Entrer</button>
+      <button class="button-30" role="button">Let's GO</button>
+
     </form>
   </main>
 </template>
@@ -36,9 +33,4 @@ export default {
 }
 </script>
 
-<style scoped>
-.home { padding: 1.5rem; max-width: 700px; margin: 3rem auto; }
-.form { display: flex; gap: 0.5rem; flex-direction: column; margin-top: 1rem }
-input { padding: .5rem; font-size: 1rem; }
-button { padding: .6rem 1rem; font-size: 1rem; cursor: pointer; }
-</style>
+<style src="../style_Home.css" scoped></style>

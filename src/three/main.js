@@ -51,6 +51,9 @@ export class ThreeExperience {
   }
 
   createWorld() {
+    // ----- HAUTEUR DE SURÉLÉVATION -----
+    const elevationHeight = 2.4; // Hauteur d'un étage
+
     // ----- SOL -----
     const groundGeometry = new THREE.PlaneGeometry(300, 200);
     const groundMaterial = new THREE.MeshStandardMaterial({
@@ -59,6 +62,7 @@ export class ThreeExperience {
     });
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
+    ground.position.y = elevationHeight;
     ground.receiveShadow = true;
     this.scene.add(ground);
 
@@ -90,6 +94,8 @@ export class ThreeExperience {
 
     // ----- BÂTIMENT -----
     const buildingGroup = new THREE.Group();
+    buildingGroup.position.y = elevationHeight;
+    this.createBasement(buildingGroup);
     this.createGeodataWings(buildingGroup);
     this.createPontsWings(buildingGroup);
     this.createAtrium(buildingGroup);
@@ -97,9 +103,9 @@ export class ThreeExperience {
     this.scene.add(buildingGroup);
 
     // ----- ENVIRONNEMENT -----
-    this.createParking();
-    this.createTrees();
-    this.createPaths();
+    this.createParking(elevationHeight);
+    this.createTrees(elevationHeight);
+    this.createPaths(elevationHeight);
   }
 
   createInteractiveFloor(x, y, z, width, depth, floorNumber, wing, wingNumber) {
@@ -174,6 +180,119 @@ export class ThreeExperience {
       }
       
       return group;
+  }
+
+  createBasement(buildingGroup) {
+    const basementGroup = new THREE.Group();
+    
+    // Dimensions du sous-sol - agrandi pour couvrir tout l'atrium et éviter les conflits
+    const atriumLength = 40;
+    const atriumWidth = 18; // Légèrement plus large que l'atrium (16) pour éviter les chevauchements
+    const basementHeight = 2.4; // Même hauteur qu'un étage
+    
+    // Plancher du sous-sol (sol) - CLIQUABLE
+    const floorGeometry = new THREE.BoxGeometry(atriumWidth, 0.2, atriumLength);
+    const floorMaterial = new THREE.MeshStandardMaterial({
+      color: 0x404040,
+      roughness: 0.8,
+    });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.position.set(0, -basementHeight / 2, 0);
+    floor.receiveShadow = true;
+    
+    // Rendre le plancher cliquable
+    floor.userData = {
+      floorNumber: -1,
+      wing: 'RDC',
+      wingNumber: 0,
+      isInteractive: true,
+    };
+    this.interactiveFloors.push(floor);
+    
+    basementGroup.add(floor);
+    
+    // Ligne de délimitation du sous-sol
+    const lineGeometry = new THREE.BoxGeometry(atriumWidth + 0.1, 0.05, atriumLength + 0.1);
+    const lineMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const line = new THREE.Mesh(lineGeometry, lineMaterial);
+    line.position.set(0, -basementHeight / 2 - 0.1, 0);
+    basementGroup.add(line);
+    
+    // Plafond du sous-sol
+    const ceilingGeometry = new THREE.BoxGeometry(atriumWidth, 0.2, atriumLength);
+    const ceilingMaterial = new THREE.MeshStandardMaterial({
+      color: 0x666666,
+      roughness: 0.7,
+    });
+    const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+    ceiling.position.set(0, basementHeight / 2 - 0.1, 0);
+    ceiling.receiveShadow = true;
+    basementGroup.add(ceiling);
+    
+    // Murs du sous-sol
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      color: 0x505050,
+      roughness: 0.8,
+    });
+    
+    // Mur avant
+    const frontWallGeometry = new THREE.BoxGeometry(atriumWidth, basementHeight, 0.3);
+    const frontWall = new THREE.Mesh(frontWallGeometry, wallMaterial);
+    frontWall.position.set(0, 0, -atriumLength / 2);
+    frontWall.castShadow = true;
+    basementGroup.add(frontWall);
+    
+    // Mur arrière
+    const backWallGeometry = new THREE.BoxGeometry(atriumWidth, basementHeight, 0.3);
+    const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+    backWall.position.set(0, 0, atriumLength / 2);
+    backWall.castShadow = true;
+    basementGroup.add(backWall);
+    
+    // Mur gauche
+    const leftWallGeometry = new THREE.BoxGeometry(0.3, basementHeight, atriumLength);
+    const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial);
+    leftWall.position.set(-atriumWidth / 2, 0, 0);
+    leftWall.castShadow = true;
+    basementGroup.add(leftWall);
+    
+    // Mur droit
+    const rightWallGeometry = new THREE.BoxGeometry(0.3, basementHeight, atriumLength);
+    const rightWall = new THREE.Mesh(rightWallGeometry, wallMaterial);
+    rightWall.position.set(atriumWidth / 2, 0, 0);
+    rightWall.castShadow = true;
+    basementGroup.add(rightWall);
+    
+    // Poutres de support
+    const beamMaterial = new THREE.MeshStandardMaterial({
+      color: 0x707070,
+      metalness: 0.6,
+      roughness: 0.3,
+    });
+    
+    // Poutres horizontales (grille de support)
+    for (let i = -atriumLength / 2 + 3; i <= atriumLength / 2 - 3; i += 8) {
+      for (let j = -atriumWidth / 2 + 2; j <= atriumWidth / 2 - 2; j += 6) {
+        const beamGeometry = new THREE.CylinderGeometry(0.15, 0.15, 1, 8);
+        const beam = new THREE.Mesh(beamGeometry, beamMaterial);
+        beam.position.set(j, 0, i);
+        beam.castShadow = true;
+        basementGroup.add(beam);
+      }
+    }
+    
+    // Colonnes de support verticales
+    for (let i = -atriumLength / 2 + 8; i <= atriumLength / 2 - 8; i += 16) {
+      for (let j = -atriumWidth / 2 + 3; j <= atriumWidth / 2 - 3; j += 8) {
+        const columnGeometry = new THREE.CylinderGeometry(0.2, 0.2, basementHeight - 0.5, 8);
+        const column = new THREE.Mesh(columnGeometry, beamMaterial);
+        column.position.set(j, 0, i);
+        column.castShadow = true;
+        basementGroup.add(column);
+      }
+    }
+    
+    buildingGroup.add(basementGroup);
   }
 
   createGeodataWings(buildingGroup) {
@@ -334,26 +453,68 @@ export class ThreeExperience {
     buildingGroup.add(entranceGroup);
   }
 
-  createParking() {
-    const parkingGeometry = new THREE.PlaneGeometry(60, 40);
-    const parkingMaterial = new THREE.MeshStandardMaterial({ color: 0x404040, roughness: 0.9 });
-    const parking = new THREE.Mesh(parkingGeometry, parkingMaterial);
-    parking.rotation.x = -Math.PI / 2;
-    parking.position.set(0, 0.02, 70);
-    parking.receiveShadow = true;
-    this.scene.add(parking);
+  createParking(elevationHeight) {
+    // ----- PLACE GRISE UNIFORME DEVANT L'ÉCOLE (SUD) -----
+    const plazaGeometry = new THREE.PlaneGeometry(60, 30);
+    const plazaMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x888888,
+      roughness: 0.8,
+      metalness: 0.05
+    });
+    const plaza = new THREE.Mesh(plazaGeometry, plazaMaterial);
+    plaza.rotation.x = -Math.PI / 2;
+    plaza.position.set(0, elevationHeight + 0.01, 25);
+    plaza.receiveShadow = true;
+    this.scene.add(plaza);
 
-    const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const lineGeometry = new THREE.PlaneGeometry(0.2, 40);
-    for (let i = 0; i < 10; i++) {
-        const line = new THREE.Mesh(lineGeometry, lineMaterial);
-        line.rotation.x = -Math.PI / 2;
-        line.position.set(-25 + i * 5, 0.03, 70);
-        this.scene.add(line);
+    // ----- ROUTE AU SUD AVEC TROTTOIR -----
+    const roadGeometry = new THREE.PlaneGeometry(60, 8);
+    const roadMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x303030, 
+      roughness: 0.9,
+      metalness: 0.05
+    });
+    const road = new THREE.Mesh(roadGeometry, roadMaterial);
+    road.rotation.x = -Math.PI / 2;
+    road.position.set(0, elevationHeight + 0.005, 75);
+    road.receiveShadow = true;
+    this.scene.add(road);
+
+    // Marquages de route
+    const markingMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    for (let z = 70; z <= 80; z += 2) {
+      const markingGeometry = new THREE.PlaneGeometry(0.3, 1);
+      const marking = new THREE.Mesh(markingGeometry, markingMaterial);
+      marking.rotation.x = -Math.PI / 2;
+      marking.position.set(0, elevationHeight + 0.01, z);
+      this.scene.add(marking);
     }
+
+    // ----- ROUTE À L'OUEST AVEC TROTTOIR -----
+    const westRoadGeometry = new THREE.PlaneGeometry(8, 120
+    );
+    const westRoad = new THREE.Mesh(roadGeometry, roadMaterial);
+    westRoad.geometry = westRoadGeometry;
+    westRoad.rotation.x = -Math.PI/2;
+    westRoad.position.set(-50, elevationHeight + 0.005, 10);
+    westRoad.receiveShadow = true;
+    this.scene.add(westRoad);
+
+    // Trottoir à l'ouest
+    const westSidewalkGeometry = new THREE.PlaneGeometry(2, 120);
+    const sidewalkMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0xcccccc,
+      roughness: 0.85
+    });
+    const westSidewalk = new THREE.Mesh(westSidewalkGeometry, sidewalkMaterial);
+    westSidewalk.rotation.x = -Math.PI / 2;
+    westSidewalk.position.set(-79, elevationHeight + 0.008, 10);
+    westSidewalk.receiveShadow = true;
+    this.scene.add(westSidewalk);
   }
 
-  createTrees() {
+  createTrees(elevationHeight) {
+    // Fonction pour créer un arbre
     const createTree = (x, z) => {
       const treeGroup = new THREE.Group();
       const trunk = new THREE.Mesh(
@@ -370,27 +531,36 @@ export class ThreeExperience {
       foliage.position.y = 5;
       foliage.castShadow = true;
       treeGroup.add(foliage);
-      treeGroup.position.set(x, 0, z);
+      treeGroup.position.set(x+22, elevationHeight, z);
       this.scene.add(treeGroup);
     };
-    createTree(-60, 40);
-    createTree(-60, 0);
-    createTree(-60, -40);
-    createTree(60, 40);
-    createTree(60, 0);
-    createTree(60, -40);
+
+    // ----- ARBRES SUR LA PORTION SUD SEULEMENT -----
+    // Côté ouest - portion sud
+    for (let z = 1; z <= 35; z += 8) {
+      createTree(-58, z);
+    }
+
+    // Côté est - portion sud
+    for (let z = 1; z <= 35; z += 8) {
+      createTree(58, z);
+    }
   }
 
-  createPaths() {
-    const pathGeometry = new THREE.PlaneGeometry(5, 120);
-    const pathMaterial = new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.8 });
-    const path1 = new THREE.Mesh(pathGeometry, pathMaterial);
-    path1.rotation.x = -Math.PI / 2;
-    path1.position.set(-55, 0.01, 0);
-    this.scene.add(path1);
-    const path2 = path1.clone();
-    path2.position.set(55, 0.01, 0);
-    this.scene.add(path2);
+  createPaths(elevationHeight) {
+    // ----- CHEMIN DROIT (EST) -----
+    const rightPathGeometry = new THREE.PlaneGeometry(12, 70);
+    const pathMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x7a7a7a, 
+      roughness: 0.8,
+      metalness: 0.02
+    });
+    const rightPath = new THREE.Mesh(rightPathGeometry, pathMaterial);
+    rightPath.rotation.x = -Math.PI / 2;
+    rightPath.position.set(58, elevationHeight + 0.008, 20);
+    this.scene.add(rightPath);
+
+    // Note : La route à l'ouest avec trottoir est créée dans createParking()
   }
 
   createLighting() {

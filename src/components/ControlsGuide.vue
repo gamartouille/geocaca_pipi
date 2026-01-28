@@ -1,8 +1,8 @@
 <template>
   <div id="controls">
-    🖱️ Cliquez et glissez pour faire tourner<br />
-    🔍 Molette pour zoomer/dézoomer<br />
-    👆 Cliquez sur un étage pour voir les infos
+    Cliquez et glissez pour faire tourner<br />
+    Molette pour zoomer/dézoomer<br />
+    Cliquez sur un étage pour voir qui est passé avant vous
   </div>
 </template>
 
