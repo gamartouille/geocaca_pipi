@@ -45,6 +45,17 @@ export class ThreeExperience {
     this.rotation = { x: 0.3, y: 0.8 };
     this.dragDistance = 0;
     this.zoomDistance = 100;
+    
+    // Touch support
+    this.touchStartDistance = 0;
+    this.isTouchDevice = () => {
+      return (
+        (typeof window !== 'undefined' && 
+        ('ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          navigator.msMaxTouchPoints > 0))
+      );
+    };
 
     this.createWorld();
     this.createLighting();
@@ -589,12 +600,21 @@ export class ThreeExperience {
     this.onWheel = this.onWheel.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
     this.onClick = this.onClick.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
 
     this.renderer.domElement.addEventListener('mousedown', this.onMouseDown);
     this.renderer.domElement.addEventListener('mousemove', this.onMouseMove);
     this.renderer.domElement.addEventListener('mouseup', this.onMouseUp);
     this.renderer.domElement.addEventListener('wheel', this.onWheel);
     this.renderer.domElement.addEventListener('click', this.onClick);
+    
+    // Touch events
+    this.renderer.domElement.addEventListener('touchstart', this.onTouchStart);
+    this.renderer.domElement.addEventListener('touchmove', this.onTouchMove);
+    this.renderer.domElement.addEventListener('touchend', this.onTouchEnd);
+    
     window.addEventListener('resize', this.onWindowResize);
   }
 
@@ -652,6 +672,20 @@ export class ThreeExperience {
     }
   }
 
+  onTouchClick(touch) {
+    // Tap detection on touch (only if minimal movement)
+    if (this.dragDistance > 5) return;
+
+    this.mouse.x = (touch.clientX / this.container.clientWidth) * 2 - 1;
+    this.mouse.y = -(touch.clientY / this.container.clientHeight) * 2 + 1;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    const intersects = this.raycaster.intersectObjects(this.interactiveFloors);
+
+    if (intersects.length > 0 && intersects[0].object.userData.isInteractive) {
+      this.onFloorClick(intersects[0].object.userData);
+    }
+  }
+
   onWheel(e) {
     e.preventDefault();
     this.zoomDistance += e.deltaY * 0.05;
@@ -662,6 +696,76 @@ export class ThreeExperience {
     this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+  }
+
+  onTouchStart(e) {
+    if (e.touches.length === 1) {
+      // Single finger - rotation
+      this.isDragging = true;
+      this.dragDistance = 0;
+      this.previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    } else if (e.touches.length === 2) {
+      // Two fingers - pinch zoom
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      this.touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+    }
+  }
+
+  onTouchMove(e) {
+    e.preventDefault();
+    
+    if (e.touches.length === 1 && this.isDragging) {
+      // Single finger - rotation
+      const deltaX = e.touches[0].clientX - this.previousMousePosition.x;
+      const deltaY = e.touches[0].clientY - this.previousMousePosition.y;
+      this.dragDistance += Math.abs(deltaX) + Math.abs(deltaY);
+      
+      this.rotation.y += deltaX * 0.005;
+      this.rotation.x += deltaY * 0.005;
+      this.rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 2, this.rotation.x));
+      
+      this.previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      
+      // Hover detection on touch
+      this.mouse.x = (e.touches[0].clientX / this.container.clientWidth) * 2 - 1;
+      this.mouse.y = -(e.touches[0].clientY / this.container.clientHeight) * 2 + 1;
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const intersects = this.raycaster.intersectObjects(this.interactiveFloors);
+
+      if (this.hoveredFloor && (!intersects.length || intersects[0].object !== this.hoveredFloor)) {
+        this.hoveredFloor.material.color.setHex(0xc0c0c0);
+        this.hoveredFloor = null;
+      }
+
+      if (intersects.length > 0 && intersects[0].object.userData.isInteractive) {
+        this.hoveredFloor = intersects[0].object;
+        this.hoveredFloor.material.color.setHex(0xcc5555);
+      }
+    } else if (e.touches.length === 2) {
+      // Two fingers - pinch zoom
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const currentDistance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (this.touchStartDistance > 0) {
+        const delta = this.touchStartDistance - currentDistance;
+        this.zoomDistance += delta * 0.1;
+        this.zoomDistance = Math.max(40, Math.min(200, this.zoomDistance));
+        this.touchStartDistance = currentDistance;
+      }
+    }
+  }
+
+  onTouchEnd(e) {
+    if (e.touches.length === 0) {
+      // Check if it was a tap (minimal movement)
+      if (this.dragDistance < 5 && e.changedTouches.length > 0) {
+        this.onTouchClick(e.changedTouches[0]);
+      }
+      this.isDragging = false;
+      this.touchStartDistance = 0;
+    }
   }
 
   animate() {
@@ -683,6 +787,12 @@ export class ThreeExperience {
     this.renderer.domElement.removeEventListener('mouseup', this.onMouseUp);
     this.renderer.domElement.removeEventListener('wheel', this.onWheel);
     this.renderer.domElement.removeEventListener('click', this.onClick);
+    
+    // Remove touch events
+    this.renderer.domElement.removeEventListener('touchstart', this.onTouchStart);
+    this.renderer.domElement.removeEventListener('touchmove', this.onTouchMove);
+    this.renderer.domElement.removeEventListener('touchend', this.onTouchEnd);
+    
     window.removeEventListener('resize', this.onWindowResize);
 
     this.renderer.dispose();
