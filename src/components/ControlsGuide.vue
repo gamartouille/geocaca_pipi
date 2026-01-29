@@ -18,4 +18,24 @@
   font-size: 12px;
   z-index: 10;
 }
+
+@media (max-width: 768px) {
+  #controls {
+    bottom: 15px;
+    left: 10px;
+    padding: 10px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  #controls {
+    bottom: 10px;
+    left: 8px;
+    padding: 8px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+}
 </style>

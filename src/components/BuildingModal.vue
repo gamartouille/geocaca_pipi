@@ -241,7 +241,28 @@ function starArray(n) {
   z-index: 1000;
   min-width: 420px;
   max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
   animation: modalAppear 0.3s ease-out;
+}
+
+@media (max-width: 768px) {
+  #modal {
+    padding: 20px;
+    border-radius: 15px;
+    min-width: auto;
+    width: calc(100vw - 30px);
+    max-height: 85vh;
+  }
+}
+
+@media (max-width: 480px) {
+  #modal {
+    padding: 15px;
+    border-radius: 12px;
+    width: calc(100vw - 20px);
+    max-height: 80vh;
+  }
 }
 
 @keyframes modalAppear {
@@ -271,30 +292,98 @@ function starArray(n) {
   gap: 20px;
 }
 
+@media (max-width: 768px) {
+  #modal h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+  }
+
+  #modal-content {
+    font-size: 13px;
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  #modal h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  #modal-content {
+    font-size: 12px;
+    gap: 12px;
+  }
+}
+
 #modal ul { list-style: none; padding: 0; margin: 0 }
 
 .record-item { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06) }
-.record-meta { display:flex; gap:10px; align-items:center }
+.record-meta { display:flex; gap:10px; align-items:center; flex-wrap: wrap }
 .record-rating { color: #ffd700 }
 .record-date { margin-left: auto; font-size: 11px; opacity: 0.9 }
 .record-comment { margin-top: 6px; font-style: italic; opacity: 0.95 }
 
 .add-section { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px }
 .form-row { margin-bottom: 10px; display:flex; flex-direction: column }
-input, textarea { padding: 8px; border-radius: 6px; border: none; outline: none }
-.stars { display:flex; gap:6px }
-.star-btn { background: transparent; color: rgba(255,255,255,0.35); border: none; font-size: 22px; cursor: pointer }
+input, textarea { padding: 8px; border-radius: 6px; border: none; outline: none; font-size: 16px; }
+textarea { resize: vertical; min-height: 80px; }
+.stars { display:flex; gap:6px; flex-wrap: wrap }
+.star-btn { background: transparent; color: rgba(255,255,255,0.35); border: none; font-size: 22px; cursor: pointer; padding: 4px; }
 .star-btn.active { color: #ffd700 }
 .actions { display:flex; justify-content: flex-end }
-.actions button { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer }
+.actions button { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; }
+
+@media (max-width: 480px) {
+  .record-date {
+    margin-left: 0;
+    margin-top: 4px;
+    width: 100%;
+  }
+  .star-btn {
+    font-size: 20px;
+  }
+  textarea {
+    min-height: 70px;
+  }
+}
 
 #overlay { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; backdrop-filter: blur(5px); }
+
+@supports not (backdrop-filter: blur(5px)) {
+  #overlay {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
 </style>
 <style scoped>
-.message-window { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; z-index:2000 }
-.message-box { background: #fff; color: #111; padding: 20px; border-radius: 10px; min-width: 320px; max-width: 80vw; box-shadow: 0 10px 40px rgba(0,0,0,0.4) }
+.message-window { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; z-index:2000; padding: 10px; }
+.message-box { background: #fff; color: #111; padding: 20px; border-radius: 10px; min-width: 320px; max-width: 80vw; box-shadow: 0 10px 40px rgba(0,0,0,0.4); position: relative; }
 .message-box h4 { margin:0 0 10px 0 }
-.message-content { margin-bottom: 12px }
+.message-content { margin-bottom: 12px; line-height: 1.6; }
 .message-actions { text-align: right }
-.msg-close { position:absolute; right:12px; top:8px; background:transparent; border:none; font-size:18px; cursor:pointer }
+.msg-close { position:absolute; right:12px; top:8px; background:transparent; border:none; font-size:18px; cursor:pointer; padding: 4px; }
+
+@media (max-width: 768px) {
+  .message-box {
+    min-width: auto;
+    max-width: calc(100vw - 20px);
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .message-box {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  .message-box h4 {
+    font-size: 14px;
+  }
+  .message-content {
+    font-size: 13px;
+  }
+}
 </style>
