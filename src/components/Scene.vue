@@ -37,8 +37,8 @@ onUnmounted(() => {
 <template>
   <div ref="sceneContainer" class="scene-container"></div>
   <div v-if="nick" class="welcome-overlay">
-    Bonjour, {{ nick }} — visite de l'école
-    <button @click="clearNick">Changer</button>
+    Olà, {{ nick }}
+    <button @click="clearNick">Changer de pseudo</button>
   </div>
 </template>
 

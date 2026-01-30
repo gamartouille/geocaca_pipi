@@ -4,11 +4,19 @@
 
     <form @submit.prevent="enterSite" class="form">
       <label for="nick">Ton pseudo de pooper</label>
-      <input id="nick" v-model="nick" required maxlength="30" placeholder="ex : Bastien DoucheDoré, Clara Crotte, Nell Caca, Louise Goupet, Mathéo Rendsmoitoncaca,..." />
+      <input id="nick" v-model="nick" required maxlength="30" placeholder="ex : Mathéo Rendsmoitoncaca, Louise Goupet, Bastien DoucheDoré, Clara Crotte, Nell Caca..." />
 
       <button class="button-30" role="button">Let's GO</button>
 
     </form>
+
+    
+    <img src="D:\ENSG\geocaca-pipi\geocaca_pipi\public\fond_ecran_poopign.png" alt="Logo GéocacaPipi" class="logo" />
+    
+    <p>
+      Merci à Diego, Jules et Maël pour toute l'aide apportée
+    </p>
+  
   </main>
 </template>
 

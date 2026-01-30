@@ -88,13 +88,15 @@ export class ThreeExperience {
         envMapIntensity: 1,
       }),
       aluminum: new THREE.MeshStandardMaterial({
-        color: 0xd0d0d0,
+        color: 0x88ccff,
         metalness: 0.8,
         roughness: 0.3,
       }),
       concrete: new THREE.MeshStandardMaterial({
         color: 0xe0e0e0,
         roughness: 0.8,
+        transparent: true,
+        opacity: 0.8,
       }),
       steel: new THREE.MeshStandardMaterial({
         color: 0x707070,
@@ -121,11 +123,15 @@ export class ThreeExperience {
 
   createInteractiveFloor(x, y, z, width, depth, floorNumber, wing, wingNumber) {
     const floorHeight = 2.4;
-    const defaultFloorColor = 0xc0c0c0;
+    const defaultFloorColor = 0x5aaaaa;
     const floorGeometry = new THREE.BoxGeometry(width, floorHeight, depth);
-    const floorMaterial = new THREE.MeshStandardMaterial({
+    const floorMaterial = new THREE.MeshPhysicalMaterial({
       color: defaultFloorColor,
-      roughness: 0.7,
+      metalness: 0.2,
+      roughness: 0.4,
+      transparent: true,
+      opacity: 0.75,
+      ior: 1.5,
     });
 
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -199,7 +205,7 @@ export class ThreeExperience {
     // Dimensions du sous-sol - agrandi pour couvrir tout l'atrium et éviter les conflits
     const atriumLength = 40;
     const atriumWidth = 18; // Légèrement plus large que l'atrium (16) pour éviter les chevauchements
-    const basementHeight = 2.4; // Même hauteur qu'un étage
+    const basementHeight = 5; // Même hauteur qu'un étage
     
     // Plancher du sous-sol (sol) - CLIQUABLE
     const floorGeometry = new THREE.BoxGeometry(atriumWidth, 0.2, atriumLength);
@@ -416,7 +422,7 @@ export class ThreeExperience {
     canopy2.position.set(4, 11, 0);
     atriumGroup.add(canopy2);
 
-    const beamGeometry = new THREE.CylinderGeometry(0.15, 0.15, 12, 8);
+    const beamGeometry = new THREE.CylinderGeometry(0.15, 0.15, 6, 8);
     for (let i = -atriumLength/2; i <= atriumLength/2; i += 5) {
       const beam1 = new THREE.Mesh(beamGeometry, this.materials.steel);
       beam1.position.set(-4, 12, i);
@@ -466,7 +472,7 @@ export class ThreeExperience {
 
   createParking(elevationHeight) {
     // ----- PLACE GRISE UNIFORME DEVANT L'ÉCOLE (SUD) -----
-    const plazaGeometry = new THREE.PlaneGeometry(60, 30);
+    const plazaGeometry = new THREE.PlaneGeometry(90, 200);
     const plazaMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x888888,
       roughness: 0.8,
@@ -474,7 +480,7 @@ export class ThreeExperience {
     });
     const plaza = new THREE.Mesh(plazaGeometry, plazaMaterial);
     plaza.rotation.x = -Math.PI / 2;
-    plaza.position.set(0, elevationHeight + 0.01, 25);
+    plaza.position.set(5, elevationHeight+0.01, 0);
     plaza.receiveShadow = true;
     this.scene.add(plaza);
 
@@ -485,43 +491,67 @@ export class ThreeExperience {
       roughness: 0.9,
       metalness: 0.05
     });
-    const road = new THREE.Mesh(roadGeometry, roadMaterial);
-    road.rotation.x = -Math.PI / 2;
-    road.position.set(0, elevationHeight + 0.005, 75);
-    road.receiveShadow = true;
-    this.scene.add(road);
+    
 
-    // Marquages de route
-    const markingMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-    for (let z = 70; z <= 80; z += 2) {
-      const markingGeometry = new THREE.PlaneGeometry(0.3, 1);
-      const marking = new THREE.Mesh(markingGeometry, markingMaterial);
-      marking.rotation.x = -Math.PI / 2;
-      marking.position.set(0, elevationHeight + 0.01, z);
-      this.scene.add(marking);
-    }
-
-    // ----- ROUTE À L'OUEST AVEC TROTTOIR -----
-    const westRoadGeometry = new THREE.PlaneGeometry(8, 120
-    );
-    const westRoad = new THREE.Mesh(roadGeometry, roadMaterial);
-    westRoad.geometry = westRoadGeometry;
+    // ----- ROUTE À L'OUEST (NORD-SUD) AVEC TROTTOIR -----
+    const westRoadGeometry = new THREE.PlaneGeometry(20, 500);
+    const westRoad = new THREE.Mesh(westRoadGeometry, roadMaterial);
     westRoad.rotation.x = -Math.PI/2;
-    westRoad.position.set(-50, elevationHeight + 0.005, 10);
+    // aligner la route transversale pour qu'elle croise la nouvelle route devant l'entrée
+    const newRoadZ = 29; // position Z de la nouvelle route devant les bosquets
+    westRoad.position.set(-50, elevationHeight + 0.2, newRoadZ);
     westRoad.receiveShadow = true;
     this.scene.add(westRoad);
 
     // Trottoir à l'ouest
-    const westSidewalkGeometry = new THREE.PlaneGeometry(2, 120);
+    const westSidewalkGeometry = new THREE.PlaneGeometry(7.5, 500);
     const sidewalkMaterial = new THREE.MeshStandardMaterial({ 
       color: 0xcccccc,
       roughness: 0.85
     });
     const westSidewalk = new THREE.Mesh(westSidewalkGeometry, sidewalkMaterial);
     westSidewalk.rotation.x = -Math.PI / 2;
-    westSidewalk.position.set(-79, elevationHeight + 0.008, 10);
+    westSidewalk.position.set(-65, elevationHeight + 0.2, newRoadZ);
     westSidewalk.receiveShadow = true;
     this.scene.add(westSidewalk);
+    //Trottoir à l'est
+    const eastSidewalkGeometry = new THREE.PlaneGeometry(7.5, 500);
+    const eastSidewalk = new THREE.Mesh(eastSidewalkGeometry, sidewalkMaterial);
+    eastSidewalk.rotation.x = -Math.PI / 2;
+    eastSidewalk.position.set(-35, elevationHeight + 0.1, newRoadZ);
+    eastSidewalk.receiveShadow = true;
+    this.scene.add(eastSidewalk);
+
+
+    // ----- NOUVELLE ROUTE (EST-OUEST) DEVANT LES BOSQUETS : TROTTOIR - ROUTE - TROTTOIR -----
+    // Dimensions
+    const newRoadWidth = 120; // largeur totale de la zone (x)
+    const newRoadDepth = 12; // épaisseur de la chaussée (z)
+    const sidewalkWidth = 6; // largeur des trottoirs
+
+    // Trottoir sud (côté bâtiment)
+    const sidewalkSouthGeo = new THREE.PlaneGeometry(newRoadWidth+100, sidewalkWidth);
+    const sidewalkSouth = new THREE.Mesh(sidewalkSouthGeo, sidewalkMaterial);
+    sidewalkSouth.rotation.x = -Math.PI / 2;
+    sidewalkSouth.position.set(70, elevationHeight + 0.2, newRoadZ+15 - newRoadDepth/2 - sidewalkWidth/2);
+    sidewalkSouth.receiveShadow = true;
+    this.scene.add(sidewalkSouth);
+
+    // Chaussée
+    const roadGeo = new THREE.PlaneGeometry(newRoadWidth+100, newRoadDepth);
+    const road = new THREE.Mesh(roadGeo, roadMaterial);
+    road.rotation.x = -Math.PI / 2;
+    road.position.set(70, elevationHeight + 0.2, newRoadZ+15);
+    road.receiveShadow = true;
+    this.scene.add(road);
+
+    // Trottoir nord (côté extérieur)
+    const sidewalkNorthGeo = new THREE.PlaneGeometry(newRoadWidth+100, sidewalkWidth);
+    const sidewalkNorth = new THREE.Mesh(sidewalkNorthGeo, sidewalkMaterial);
+    sidewalkNorth.rotation.x = -Math.PI / 2;
+    sidewalkNorth.position.set(70, elevationHeight + 0.1, newRoadZ+15 + newRoadDepth/2 + sidewalkWidth/2);
+    sidewalkNorth.receiveShadow = true;
+    this.scene.add(sidewalkNorth);
   }
 
   createTrees(elevationHeight) {
@@ -542,36 +572,67 @@ export class ThreeExperience {
       foliage.position.y = 5;
       foliage.castShadow = true;
       treeGroup.add(foliage);
-      treeGroup.position.set(x+22, elevationHeight, z);
+      treeGroup.position.set(x, elevationHeight, z);
       this.scene.add(treeGroup);
     };
 
-    // ----- ARBRES SUR LA PORTION SUD SEULEMENT -----
-    // Côté ouest - portion sud
-    for (let z = 1; z <= 35; z += 8) {
-      createTree(-58, z);
+    // ----- ARBRES SUR TOUTE LA LONGUEUR DE LA ROUTE SUD -----
+    // Côté ouest - tout le long
+    for (let z = -80; z <= 80; z += 8) {
+      createTree(-67, z);
     }
 
-    // Côté est - portion sud
-    for (let z = 1; z <= 35; z += 8) {
-      createTree(58, z);
+    // Côté ouest - tout le long
+    for (let z = -38; z <= 80; z += 8) {
+      createTree(-38, z-40);
     }
+
+    for (let z = -80; z <= 80; z += 8) {
+      createTree(108, z);
+    }
+
+    // ----- BOSQUETS LATÉRAUX ADAPTÉS À LA TAILLE DE CHAQUE AILE -----
+    // On récupère les tailles des ailes (mêmes que dans createGeodataWings / createPontsWings)
+    const entranceZ = 23; // Position z de la porte ronde
+    const geodataWidth = 20;
+    const geodataDepth = 12;
+    const pontsWidth = 40;
+    const pontsDepth = 12;
+    const geodataX = -geodataWidth / 2-8+9; // position X de l'aile Geodata (gauche)
+    const pontsX = pontsWidth / 2-8+10; // position X de l'aile Ponts (droite)
+
+    const offsetAway = 6; // décalage vers l'extérieur pour éviter pénétrer le bâtiment
+    const bosquetSpacing = 3; // espacement entre arbres
+    let rows = 3; // nombre de lignes en profondeur
+
+    // Bosquet côté gauche (aligné avec l'aile Geodata) — largeur = geodataWidth
+    const leftCenterX = geodataX - offsetAway;
+    const leftHalfWidth = geodataWidth / 2;
+    // enlever 1 colonne extérieure (on réduit la borne supérieure)
+    for (let ix = -leftHalfWidth; ix <= leftHalfWidth - bosquetSpacing; ix += bosquetSpacing) {
+      for (let rz = 0; rz < rows; rz++) {
+        const x = Math.round(leftCenterX + ix);
+        const z = entranceZ + 4 + rz * 1.8; // placé devant la porte, légèrement avancé
+        createTree(x, z);
+      }
+    }
+
+    // Bosquet côté droit (aligné avec l'aile Ponts) — largeur = pontsWidth
+    const rightCenterX = pontsX + offsetAway;
+    const rightHalfWidth = pontsWidth / 2;
+    // enlever 1 colonne extérieure (on réduit la borne inférieure)
+    for (let ix = -rightHalfWidth + bosquetSpacing; ix <= rightHalfWidth; ix += bosquetSpacing) {
+      for (let rz = 0; rz < rows; rz++) {
+        const x = Math.round(rightCenterX + ix);
+        const z = entranceZ + 4 + rz * 1.8;
+        createTree(x, z);
+      }
+    }
+
   }
 
   createPaths(elevationHeight) {
-    // ----- CHEMIN DROIT (EST) -----
-    const rightPathGeometry = new THREE.PlaneGeometry(12, 70);
-    const pathMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0x7a7a7a, 
-      roughness: 0.8,
-      metalness: 0.02
-    });
-    const rightPath = new THREE.Mesh(rightPathGeometry, pathMaterial);
-    rightPath.rotation.x = -Math.PI / 2;
-    rightPath.position.set(58, elevationHeight + 0.008, 20);
-    this.scene.add(rightPath);
-
-    // Note : La route à l'ouest avec trottoir est créée dans createParking()
+    // Les routes et trottoirs sont gérés dans createParking()
   }
 
   createLighting() {

@@ -177,7 +177,7 @@ function starArray(n) {
         </section>
 
         <section class="add-section">
-          <h4>Enregistrer ton utilisation</h4>
+          <h4>Enregistre ton poop</h4>
 
           <!-- message overlay shown after adding a record -->
           <div v-if="showMessage" class="message-window">
@@ -189,11 +189,6 @@ function starArray(n) {
                 <button @click="showMessage = false">Fermer</button>
               </div>
             </div>
-          </div>
-
-          <div class="form-row">
-            <label>Ton pseudo (sera pris depuis ta session si vide)</label>
-            <input v-model="nick" placeholder="Ton pseudo (optionnel)" />
           </div>
 
           <div class="form-row">
@@ -214,7 +209,7 @@ function starArray(n) {
 
           <div class="form-row">
             <label>Commentaire (optionnel)</label>
-            <textarea v-model="comment" rows="3" placeholder="Raconte brièvement ton utilisation..."></textarea>
+            <textarea v-model="comment" rows="3" placeholder="Comment s'est passé ce poop ?"></textarea>
           </div>
 
           <div class="form-row actions">
