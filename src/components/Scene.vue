@@ -2,9 +2,11 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ThreeExperience } from '../three/main.js';
+import PoopHistory from './PoopHistory.vue';
 
 const emit = defineEmits(['floor-click']);
 const sceneContainer = ref(null);
+const showHistory = ref(false);
 let experience = null;
 const nick = ref('');
 const route = useRoute();
@@ -17,6 +19,14 @@ function handleFloorClick(floorData) {
 function clearNick() {
   localStorage.removeItem('nick');
   router.push({ name: 'Home' });
+}
+
+function openHistory() {
+  showHistory.value = true;
+}
+
+function closeHistory() {
+  showHistory.value = false;
 }
 
 onMounted(() => {
@@ -36,8 +46,10 @@ onUnmounted(() => {
 
 <template>
   <div ref="sceneContainer" class="scene-container"></div>
+  <PoopHistory :visible="showHistory" @close="closeHistory" />
   <div v-if="nick" class="welcome-overlay">
-    Olà, {{ nick }}
+    <div style="flex: 1">Olà, {{ nick }}</div>
+    <button @click="openHistory" class="history-btn">Mon historique</button>
     <button @click="clearNick">Changer de pseudo</button>
   </div>
 </template>
@@ -62,6 +74,7 @@ onUnmounted(() => {
   display: flex;
   gap: .6rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 .welcome-overlay button {
   background: transparent;
@@ -70,5 +83,14 @@ onUnmounted(() => {
   padding: .2rem .5rem;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.history-btn {
+  background: rgba(102, 126, 234, 0.4) !important;
+  border: 1px solid rgba(255,255,255,.4) !important;
+}
+
+.history-btn:hover {
+  background: rgba(102, 126, 234, 0.6) !important;
 }
 </style>

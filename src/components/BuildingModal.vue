@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
+import { supabase } from '../supabase/index.js'
 
 const props = defineProps({
   visible: Boolean,
@@ -10,9 +11,11 @@ const emit = defineEmits(['close'])
 const floorNames = ['RDC', '1er étage', '2ème étage', '3ème étage', '4ème étage']
 
 const records = ref([])
+const recordsByType = ref({}) // { toiletType: [records...] }
 const nick = ref('')
 const rating = ref(0)
 const comment = ref('')
+const selectedToiletType = ref('normal') // current tab
 const maxShown = 5
 const messages = ref([])
 const showMessage = ref(false)
@@ -20,6 +23,16 @@ const messageText = ref('')
 
 const wingCodeToName = { A: 'Cassini', B: 'Laplace', C: 'Maupertuis' }
 const wingNameToCode = Object.fromEntries(Object.entries(wingCodeToName).map(([k, v]) => [v.toLowerCase(), k]))
+
+// Déterminer les types de toilettes selon l'étage
+const toiletTypes = computed(() => {
+  const floorNum = props.floorData?.floorNumber
+  if (floorNum === 2 || floorNum === 4) {
+    return ['Toilettes valides', 'Toilettes handicapées']
+  } else {
+    return ['Hommes', 'Femmes']
+  }
+})
 
 function displayWingName(w) {
   if (!w) return ''
@@ -34,48 +47,53 @@ function closeModal() {
   emit('close')
 }
 
-function storageKeyForFloor(floor) {
+function storageKeyForFloor(floor, toiletType) {
   if (!floor) return null
-  // Create a stable key using wing, wingNumber, floorNumber
-  return `floor_records_${floor.wing || 'W'}_${floor.wingNumber || 0}_${floor.floorNumber || 0}`
+  return `floor_records_${floor.wing || 'W'}_${floor.wingNumber || 0}_${floor.floorNumber || 0}_${toiletType}`
 }
 
 function loadRecords() {
-  const key = storageKeyForFloor(props.floorData)
-  if (!key) {
-    records.value = []
-    return
-  }
-  try {
-    const raw = localStorage.getItem(key)
-    records.value = raw ? JSON.parse(raw) : []
-    // keep newest first
-    records.value.sort((a, b) => b.ts - a.ts)
-  } catch (e) {
-    records.value = []
+  recordsByType.value = {}
+  toiletTypes.value.forEach(type => {
+    const key = storageKeyForFloor(props.floorData, type)
+    if (!key) {
+      recordsByType.value[type] = []
+      return
+    }
+    try {
+      const raw = localStorage.getItem(key)
+      let records = raw ? JSON.parse(raw) : []
+      records.sort((a, b) => b.ts - a.ts)
+      recordsByType.value[type] = records
+    } catch (e) {
+      recordsByType.value[type] = []
+    }
+  })
+  // Initialiser selectedToiletType au premier type disponible
+  if (toiletTypes.value.length > 0) {
+    selectedToiletType.value = toiletTypes.value[0]
   }
 }
 
+const recent = computed(() => recordsByType.value[selectedToiletType.value]?.slice(0, maxShown) || [])
+
 async function fetchMessagesFile() {
   try {
-    const res = await fetch('/messages.txt')
-    if (!res.ok) return
-    const txt = await res.text()
-    // parse semicolon-separated lines: CODE;floorNumber;message
-    const lines = txt.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
-    const parsed = []
-    for (const line of lines) {
-      const parts = line.split(';')
-      // expect at least 3 columns: code;floorNumber;message
-      if (parts.length >= 3) {
-        parsed.push({
-          code: parts[0].trim(),
-          floorNumber: parts[1].trim(),
-          message: parts.slice(2).join(';').trim()
-        })
-      }
+    const { data, error } = await supabase
+      .from('messages')
+      .select('code, floor_number, wing_name, message')
+
+    if (error || !data) {
+      messages.value = []
+      return
     }
-    messages.value = parsed
+
+    messages.value = data.map((r) => ({
+      code: r.code != null ? String(r.code).trim() : '',
+      floorNumber: r.floor_number != null ? String(r.floor_number).trim() : '',
+      wingName: r.wing_name != null ? String(r.wing_name).trim() : '',
+      message: r.message || ''
+    }))
   } catch (e) {
     messages.value = []
   }
@@ -83,7 +101,6 @@ async function fetchMessagesFile() {
 
 function findMessageForFloor(floor) {
   if (!floor) return null
-  // determine code for this floor's wing
   let code = ''
   if (typeof floor.wing === 'string') {
     const s = floor.wing.trim()
@@ -93,43 +110,84 @@ function findMessageForFloor(floor) {
       if (wingNameToCode[lower]) code = wingNameToCode[lower]
     }
   }
-  // also accept direct wingCode in floor.wingCode
   if (!code && floor.wingCode) code = String(floor.wingCode).trim()
-
   const fn = String(floor.floorNumber ?? '')
-  // match code + floorNumber
-  if (code) {
-    const exact = messages.value.find(m => String(m.code) === code && String(m.floorNumber) === fn)
-    if (exact) return exact.message
+  // derive a normalized wing name for matching
+  let wingNameFromFloor = ''
+  if (typeof floor.wing === 'string') {
+    wingNameFromFloor = floor.wing.trim()
+  } else if (floor.wingName) {
+    wingNameFromFloor = String(floor.wingName).trim()
   }
-  // fallback: match floorNumber only
-  const last = messages.value.find(m => String(m.floorNumber) === fn)
+
+  const norm = (s) => (s == null ? '' : String(s).trim().toLowerCase())
+
+  // try exact match by code or wing name + floor
+  const exact = messages.value.find(m => {
+    return norm(m.floorNumber) === norm(fn) && (
+      norm(m.code) === norm(code) ||
+      norm(m.code) === norm(wingNameFromFloor) ||
+      norm(m.wingName) === norm(wingNameFromFloor) ||
+      norm(m.wingName) === norm(code)
+    )
+  })
+  if (exact) return exact.message
+
+  // fallback: any message for the floor number
+  const last = messages.value.find(m => norm(m.floorNumber) === norm(fn))
   return last ? last.message : null
 }
 
-function saveRecords() {
-  const key = storageKeyForFloor(props.floorData)
+function saveRecordsForType(toiletType) {
+  const key = storageKeyForFloor(props.floorData, toiletType)
   if (!key) return
-  localStorage.setItem(key, JSON.stringify(records.value))
+  localStorage.setItem(key, JSON.stringify(recordsByType.value[toiletType] || []))
 }
 
 async function addRecord() {
   const username = localStorage.getItem('nick') || nick.value || 'Anonyme'
-  if (!rating.value || rating.value < 1) return // rating mandatory
+  if (!rating.value || rating.value < 1) return
+  
   const entry = {
     nick: username,
     rating: Number(rating.value),
     comment: (comment.value || '').trim(),
-    ts: Date.now()
+    ts: Date.now(),
+    toilet_type: selectedToiletType.value
   }
-  records.value.unshift(entry)
-  // keep limited history (e.g., 50)
-  if (records.value.length > 50) records.value.length = 50
-  saveRecords()
-  // reset form
+  
+  if (!recordsByType.value[selectedToiletType.value]) {
+    recordsByType.value[selectedToiletType.value] = []
+  }
+  recordsByType.value[selectedToiletType.value].unshift(entry)
+  if (recordsByType.value[selectedToiletType.value].length > 50) {
+    recordsByType.value[selectedToiletType.value].length = 50
+  }
+  saveRecordsForType(selectedToiletType.value)
+  
+  // Sauvegarder dans Supabase
+  try {
+    const playerId = localStorage.getItem('playerId')
+    if (playerId) {
+      // Insérer dans la table poop_history
+      await supabase.from('poop_history').insert([
+        {
+          player_id: playerId,
+          wing_name: props.floorData.wing,
+          wing_number: props.floorData.wingNumber,
+          floor_number: props.floorData.floorNumber,
+          toilet_type: selectedToiletType.value,
+          rating: rating.value,
+          comment: comment.value || null,
+        },
+      ])
+    }
+  } catch (e) {
+    console.warn('Erreur Supabase:', e)
+  }
+  
   rating.value = 0
   comment.value = ''
-  // ensure messages loaded and show message if any
   if (messages.value.length === 0) await fetchMessagesFile()
   const msg = findMessageForFloor(props.floorData)
   if (msg) {
@@ -138,18 +196,15 @@ async function addRecord() {
   }
 }
 
-const recent = computed(() => records.value.slice(0, maxShown))
+function starArray(n) {
+  return Array.from({ length: 5 }, (_, i) => i + 1)
+}
 
 watch(() => props.visible, (v) => {
   if (v) {
     loadRecords()
   }
 })
-
-// expose helper to render stars
-function starArray(n) {
-  return Array.from({ length: 5 }, (_, i) => i + 1)
-}
 </script>
 
 <template>
@@ -158,12 +213,24 @@ function starArray(n) {
     <div id="modal">
       <button id="close-modal" @click="closeModal">×</button>
       <h3 id="modal-title">
-        {{ displayWingName(floorData.wing) }} {{ floorData.wingNumber }} - {{ floorNames[floorData.floorNumber] }}
+        {{ displayWingName(floorData.wing) }} - {{ floorNames[floorData.floorNumber] }}
       </h3>
       <div id="modal-content">
+        <!-- Sélecteur de type de toilette (volets) -->
+        <div class="toilet-type-tabs">
+          <button
+            v-for="type in toiletTypes"
+            :key="type"
+            :class="['tab-btn', { active: selectedToiletType === type }]"
+            @click="selectedToiletType = type"
+          >
+            {{ type }}
+          </button>
+        </div>
+
         <section class="recent-section">
-          <h4>Dernières utilisations</h4>
-          <div v-if="recent.length === 0">Aucune utilisation enregistrée pour cet étage.</div>
+          <h4>Dernières utilisations ({{ selectedToiletType }})</h4>
+          <div v-if="recent.length === 0">Aucune utilisation enregistrée pour ce type.</div>
           <ul v-else>
             <li v-for="(r, idx) in recent" :key="r.ts + '-' + idx" class="record-item">
               <div class="record-meta">
@@ -222,15 +289,24 @@ function starArray(n) {
   </template>
 
 <style scoped>
+
+@font-face {
+  font-family: 'Parchment MF';
+  src: url('D:\ENSG\geocaca-pipi\geocaca_pipi\src\fonts\Parchment MF.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  color: white;
+}
+
 #modal {
   display: block; /* Changed from none to allow Vue to control visibility */
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgb(4, 32, 147);
   color: white;
-  padding: 30px;
+  padding: 20px;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   z-index: 1000;
@@ -239,6 +315,7 @@ function starArray(n) {
   max-height: 90vh;
   overflow-y: auto;
   animation: modalAppear 0.3s ease-out;
+  font-family: sans-serif;
 }
 
 @media (max-width: 768px) {
@@ -280,11 +357,44 @@ function starArray(n) {
 }
 
 #modal-content {
-  font-size: 14px;
-  line-height: 1.6;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  font-size: 20px;
+  line-height: 0.5;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-family: 'Parchment MF', cursive;
+}
+
+/* Volets/Tabs pour les types de toilettes */
+.toilet-type-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  font-family: "Parchment MF", cursive;
+}
+
+.tab-btn {
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  font-family: "Parchment MF", cursive;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-btn.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #764ba2;
+  border-color: white;
+  font-weight: bold;
 }
 
 @media (max-width: 768px) {

@@ -123,7 +123,7 @@ export class ThreeExperience {
 
   createInteractiveFloor(x, y, z, width, depth, floorNumber, wing, wingNumber) {
     const floorHeight = 2.4;
-    const defaultFloorColor = 0x5aaaaa;
+    const defaultFloorColor = 0x00ccff;
     const floorGeometry = new THREE.BoxGeometry(width, floorHeight, depth);
     const floorMaterial = new THREE.MeshPhysicalMaterial({
       color: defaultFloorColor,
@@ -472,7 +472,7 @@ export class ThreeExperience {
 
   createParking(elevationHeight) {
     // ----- PLACE GRISE UNIFORME DEVANT L'ÉCOLE (SUD) -----
-    const plazaGeometry = new THREE.PlaneGeometry(90, 200);
+    const plazaGeometry = new THREE.PlaneGeometry(200, 140);
     const plazaMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x888888,
       roughness: 0.8,
@@ -480,7 +480,7 @@ export class ThreeExperience {
     });
     const plaza = new THREE.Mesh(plazaGeometry, plazaMaterial);
     plaza.rotation.x = -Math.PI / 2;
-    plaza.position.set(5, elevationHeight+0.01, 0);
+    plaza.position.set(50, elevationHeight+0.01, -30);
     plaza.receiveShadow = true;
     this.scene.add(plaza);
 
@@ -578,7 +578,7 @@ export class ThreeExperience {
 
     // ----- ARBRES SUR TOUTE LA LONGUEUR DE LA ROUTE SUD -----
     // Côté ouest - tout le long
-    for (let z = -80; z <= 80; z += 8) {
+    for (let z = -120; z <= 120; z += 8) {
       createTree(-67, z);
     }
 
@@ -587,8 +587,8 @@ export class ThreeExperience {
       createTree(-38, z-40);
     }
 
-    for (let z = -80; z <= 80; z += 8) {
-      createTree(108, z);
+    for (let z = -10; z <= 80; z += 8) {
+      createTree(-38, z+65);
     }
 
     // ----- BOSQUETS LATÉRAUX ADAPTÉS À LA TAILLE DE CHAQUE AILE -----
@@ -608,7 +608,6 @@ export class ThreeExperience {
     // Bosquet côté gauche (aligné avec l'aile Geodata) — largeur = geodataWidth
     const leftCenterX = geodataX - offsetAway;
     const leftHalfWidth = geodataWidth / 2;
-    // enlever 1 colonne extérieure (on réduit la borne supérieure)
     for (let ix = -leftHalfWidth; ix <= leftHalfWidth - bosquetSpacing; ix += bosquetSpacing) {
       for (let rz = 0; rz < rows; rz++) {
         const x = Math.round(leftCenterX + ix);
@@ -620,7 +619,6 @@ export class ThreeExperience {
     // Bosquet côté droit (aligné avec l'aile Ponts) — largeur = pontsWidth
     const rightCenterX = pontsX + offsetAway;
     const rightHalfWidth = pontsWidth / 2;
-    // enlever 1 colonne extérieure (on réduit la borne inférieure)
     for (let ix = -rightHalfWidth + bosquetSpacing; ix <= rightHalfWidth; ix += bosquetSpacing) {
       for (let rz = 0; rz < rows; rz++) {
         const x = Math.round(rightCenterX + ix);
@@ -628,6 +626,32 @@ export class ThreeExperience {
         createTree(x, z);
       }
     }
+
+    //Bosquets parcelle Y
+
+    //côté gauche
+
+    const leftparcelleX = geodataX - offsetAway;
+    const lefparcelleHalfWidth = geodataWidth / 2;
+    for (let ix = -lefparcelleHalfWidth; ix <= lefparcelleHalfWidth - bosquetSpacing; ix += bosquetSpacing) {
+      for (let rz = 0; rz < rows; rz++) {
+        const x = Math.round(leftparcelleX + ix);
+        const z = entranceZ + 35 + rz * 1.8; // placé devant la porte, légèrement avancé
+        createTree(x, z);
+      }
+    }
+
+    //côté droit
+    const rightparcelleX = pontsX + offsetAway;
+    const rightparcelleHalfWidth = pontsWidth / 2;
+    for (let ix = -rightparcelleHalfWidth + bosquetSpacing; ix <= rightparcelleHalfWidth; ix += bosquetSpacing) {
+      for (let rz = 0; rz < rows; rz++) {
+        const x = Math.round(rightparcelleX + ix);
+        const z = entranceZ + 35 + rz * 1.8;
+        createTree(x, z);
+      }
+    }
+
 
   }
 
