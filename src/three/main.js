@@ -144,6 +144,7 @@ export class ThreeExperience {
       wing,
       wingNumber,
       isInteractive: true,
+      originalColor: defaultFloorColor,
     };
 
     this.interactiveFloors.push(floor);
@@ -728,7 +729,9 @@ export class ThreeExperience {
     const intersects = this.raycaster.intersectObjects(this.interactiveFloors);
 
     if (this.hoveredFloor && (!intersects.length || intersects[0].object !== this.hoveredFloor)) {
-      this.hoveredFloor.material.color.setHex(0xc0c0c0);
+      // Restore original color
+      const originalColor = this.hoveredFloor.userData.originalColor || 0x00ccff;
+      this.hoveredFloor.material.color.setHex(originalColor);
       this.hoveredFloor = null;
       this.renderer.domElement.style.cursor = 'default';
     }
@@ -819,7 +822,9 @@ export class ThreeExperience {
       const intersects = this.raycaster.intersectObjects(this.interactiveFloors);
 
       if (this.hoveredFloor && (!intersects.length || intersects[0].object !== this.hoveredFloor)) {
-        this.hoveredFloor.material.color.setHex(0xc0c0c0);
+        // Restore original color
+        const originalColor = this.hoveredFloor.userData.originalColor || 0x00ccff;
+        this.hoveredFloor.material.color.setHex(originalColor);
         this.hoveredFloor = null;
       }
 
