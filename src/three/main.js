@@ -354,8 +354,8 @@ export class ThreeExperience {
     const pontsX = pontsWidth / 2 + 8;
     const wings = [
         { name: 'Belgrand', number: 1, z: pontsDepth + pontsSpacing },
-        { name: 'Belgrand', number: 2, z: 0 },
-        { name: 'Belgrand', number: 3, z: -(pontsDepth + pontsSpacing) }
+        { name: 'Prony', number: 2, z: 0 },
+        { name: 'Vicat', number: 3, z: -(pontsDepth + pontsSpacing) }
     ];
 
     wings.forEach((wing, index) => {

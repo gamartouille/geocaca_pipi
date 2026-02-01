@@ -450,7 +450,7 @@ watch(() => props.visible, (v) => {
 
 .add-section { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px }
 .form-row { margin-bottom: 10px; display:flex; flex-direction: column }
-input, textarea { padding: 8px; border-radius: 6px; border: none; outline: none; font-size: 16px; }
+input, textarea { padding: 8px; border-radius: 6px; border: none; outline: none; font-size: 16px; font-family: inherit; }
 textarea { resize: vertical; min-height: 80px; }
 .stars { display:flex; gap:6px; flex-wrap: wrap }
 .star-btn { background: transparent; color: rgba(255,255,255,0.35); border: none; font-size: 22px; cursor: pointer; padding: 4px; }
@@ -459,16 +459,42 @@ textarea { resize: vertical; min-height: 80px; }
 .actions button { padding: 8px 14px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; }
 
 @media (max-width: 480px) {
+  .add-section {
+    padding: 12px;
+    margin-top: 8px;
+  }
+
+  .form-row {
+    margin-bottom: 12px;
+  }
+
+  .form-row label {
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  input, textarea {
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  textarea {
+    min-height: 70px;
+  }
+
   .record-date {
     margin-left: 0;
     margin-top: 4px;
     width: 100%;
   }
+
   .star-btn {
     font-size: 20px;
   }
-  textarea {
-    min-height: 70px;
+
+  .actions button {
+    padding: 10px 16px;
+    font-size: 14px;
   }
 }
 
