@@ -334,7 +334,8 @@ watch(() => props.visible, (v) => {
   min-width: 420px;
   max-width: 90vw;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   animation: modalAppear 0.3s ease-out;
 }
 
@@ -382,6 +383,33 @@ watch(() => props.visible, (v) => {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.recent-section {
+  overflow-y: auto;
+  flex: 1;
+  margin-bottom: 12px;
+  padding-right: 8px;
+}
+
+.recent-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.recent-section::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.recent-section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.recent-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Volets/Tabs pour les types de toilettes */
@@ -448,7 +476,7 @@ watch(() => props.visible, (v) => {
 .record-date { margin-left: auto; font-size: 11px; opacity: 0.9 }
 .record-comment { margin-top: 6px; font-style: italic; opacity: 0.95 }
 
-.add-section { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px }
+.add-section { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; flex-shrink: 0; }
 .form-row { margin-bottom: 10px; display:flex; flex-direction: column }
 input, textarea { padding: 8px; border-radius: 6px; border: none; outline: none; font-size: 16px; font-family: inherit; }
 textarea { resize: vertical; min-height: 80px; }

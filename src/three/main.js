@@ -722,24 +722,26 @@ export class ThreeExperience {
       this.previousMousePosition = { x: e.clientX, y: e.clientY };
     }
 
-    // Hover detection
-    this.mouse.x = (e.clientX / this.container.clientWidth) * 2 - 1;
-    this.mouse.y = -(e.clientY / this.container.clientHeight) * 2 + 1;
-    this.raycaster.setFromCamera(this.mouse, this.camera);
-    const intersects = this.raycaster.intersectObjects(this.interactiveFloors);
+    // Hover detection (disabled on touch devices)
+    if (!this.isTouchDevice()) {
+      this.mouse.x = (e.clientX / this.container.clientWidth) * 2 - 1;
+      this.mouse.y = -(e.clientY / this.container.clientHeight) * 2 + 1;
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const intersects = this.raycaster.intersectObjects(this.interactiveFloors);
 
-    if (this.hoveredFloor && (!intersects.length || intersects[0].object !== this.hoveredFloor)) {
-      // Restore original color
-      const originalColor = this.hoveredFloor.userData.originalColor || 0x00ccff;
-      this.hoveredFloor.material.color.setHex(originalColor);
-      this.hoveredFloor = null;
-      this.renderer.domElement.style.cursor = 'default';
-    }
+      if (this.hoveredFloor && (!intersects.length || intersects[0].object !== this.hoveredFloor)) {
+        // Restore original color
+        const originalColor = this.hoveredFloor.userData.originalColor || 0x00ccff;
+        this.hoveredFloor.material.color.setHex(originalColor);
+        this.hoveredFloor = null;
+        this.renderer.domElement.style.cursor = 'default';
+      }
 
-    if (intersects.length > 0 && intersects[0].object.userData.isInteractive) {
-      this.hoveredFloor = intersects[0].object;
-      this.hoveredFloor.material.color.setHex(0xcc5555);
-      this.renderer.domElement.style.cursor = 'pointer';
+      if (intersects.length > 0 && intersects[0].object.userData.isInteractive) {
+        this.hoveredFloor = intersects[0].object;
+        this.hoveredFloor.material.color.setHex(0xcc5555);
+        this.renderer.domElement.style.cursor = 'pointer';
+      }
     }
   }
 
