@@ -34,6 +34,7 @@ const toiletTypes = computed(() => {
   }
 })
 
+
 function displayWingName(w) {
   if (!w) return ''
   const s = String(w).trim()
@@ -52,37 +53,64 @@ function storageKeyForFloor(floor, toiletType) {
   return `floor_records_${floor.wing || 'W'}_${floor.wingNumber || 0}_${floor.floorNumber || 0}_${toiletType}`
 }
 
-function loadRecords() {
+async function loadRecords() {
   recordsByType.value = {}
-  toiletTypes.value.forEach(type => {
-    const key = storageKeyForFloor(props.floorData, type)
-    if (!key) {
-      recordsByType.value[type] = []
-      return
-    }
-    try {
-      const raw = localStorage.getItem(key)
-      let records = raw ? JSON.parse(raw) : []
-      records.sort((a, b) => b.ts - a.ts)
-      recordsByType.value[type] = records
-    } catch (e) {
-      recordsByType.value[type] = []
-    }
-  })
+  
   // Initialiser selectedToiletType au premier type disponible
   if (toiletTypes.value.length > 0) {
     selectedToiletType.value = toiletTypes.value[0]
+  }
+
+  for (const type of toiletTypes.value) {
+    const key = storageKeyForFloor(props.floorData, type)
+
+    if (!key) {
+      recordsByType.value[type] = []
+      continue
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('poop_history')
+        .select('*, nick:player_sessions ( pseudo )')
+        .eq('wing_name', props.floorData.wing)
+        .eq('floor_number', props.floorData.floorNumber)
+        .eq('toilet_type', type)
+
+      data.map(entree => entree.nick = entree.nick.pseudo)
+
+      // console.log(data)
+      if (error) throw error
+
+      // console.log("Données reçues pour", type, ":", data)
+      
+      let records = data || []
+      
+      records.sort((a, b) => b.created_at - a.created_at)
+      recordsByType.value[type] = records
+
+    } catch (e) {
+      recordsByType.value[type] = []
+    }
   }
 }
 
 const recent = computed(() => recordsByType.value[selectedToiletType.value]?.slice(0, maxShown) || [])
 
+// console.log(await supabase
+//       .from('poop_history')
+//       .select('*'))
+// console.log(await supabase
+//       .from('player_sessions')
+//       .select('*'))
+
 async function fetchMessagesFile() {
   try {
     const { data, error } = await supabase
-      .from('messages')
-      .select('code, floor_number, wing_name, message')
+      .from('poop_history')
+      .select('*')
 
+    // console.log(data)
     if (error || !data) {
       messages.value = []
       return
@@ -123,6 +151,7 @@ function findMessageForFloor(floor) {
   const norm = (s) => (s == null ? '' : String(s).trim().toLowerCase())
 
   // try exact match by code or wing name + floor
+  // console.log(messages)
   const exact = messages.value.find(m => {
     return norm(m.floorNumber) === norm(fn) && (
       norm(m.code) === norm(code) ||
@@ -185,7 +214,6 @@ async function addRecord() {
   } catch (e) {
     console.warn('Erreur Supabase:', e)
   }
-  
   rating.value = 0
   comment.value = ''
   if (messages.value.length === 0) await fetchMessagesFile()
@@ -205,6 +233,7 @@ watch(() => props.visible, (v) => {
     loadRecords()
   }
 })
+
 </script>
 
 <template>
@@ -236,7 +265,7 @@ watch(() => props.visible, (v) => {
               <div class="record-meta">
                 <strong>{{ r.nick }}</strong>
                 <span class="record-rating">{{ '★'.repeat(r.rating) }}{{ '☆'.repeat(5 - r.rating) }}</span>
-                <small class="record-date">{{ new Date(r.ts).toLocaleString() }}</small>
+                <small class="record-date">{{ new Date(r.created_at).toLocaleString() }}</small>
               </div>
               <div class="record-comment" v-if="r.comment">{{ r.comment }}</div>
             </li>
