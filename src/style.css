@@ -2,10 +2,12 @@
 body {
   margin: 0;
   overflow: hidden; /* Prevents scrollbars from the canvas */
-  font-family: 'Arial', sans-serif;
+  /* Global app font: system UI stack for readability */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: #242424; /* Default background, will be covered by canvas */
   touch-action: manipulation;
 }
+
 
 /* Ensure the canvas takes up the full screen */
 canvas {

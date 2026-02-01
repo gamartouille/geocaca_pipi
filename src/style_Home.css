@@ -3,15 +3,9 @@ body {
   background-color: rgb(4, 32, 147);
 }
 
-@font-face {
-  font-family: 'Parchment MF';
-  src: url('D:\ENSG\geocaca-pipi\geocaca_pipi\src\fonts\Parchment MF.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  color: white;
-}
+/* Removed Parchment font-face - using system font stack from src/style.css */
 
-.home { padding: 1rem; max-width: 700px; margin: 3rem auto; background-color: rgb(4, 32, 147); font-family: 'Parchment MF', fantasy; font-size: 2rem; color: white; }
+.home { padding: 1rem; max-width: 700px; margin: 3rem auto; background-color: rgb(4, 32, 147); font-size: 2rem; color: white; }
 
 h1 { display: flex; justify-content: center; font-size: 3rem; margin-bottom: 1rem; }
 

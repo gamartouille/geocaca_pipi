@@ -1,0 +1,16 @@
+INSERT INTO messages(floor_number, wing_name, message) VALUES
+(0, 'Laplace', 'Chez les ponts, comme ça'),
+(1, 'Laplace', 'Chez les ponts, comme ça'),
+(2, 'Laplace', 'Chez les ponts, comme ça'),
+(3, 'Laplace', 'Chez les ponts, comme ça'),
+(4, 'Laplace', 'Chez les ponts, comme ça'),
+(0, 'Belgrand', 'Chez les ponts, comme ça'),
+(1, 'Belgrand', 'Chez les ponts, comme ça'),
+(2, 'Belgrand', 'Chez les ponts, comme ça'),
+(3, 'Belgrand', 'Chez les ponts, comme ça'),
+(4, 'Belgrand', 'Chez les ponts, comme ça'),
+(0, 'Prony', 'Chez les ponts, comme ça'),
+(1, 'Prony', 'Chez les ponts, comme ça'),
+(2, 'Prony', 'Chez les ponts, comme ça'),
+(3, 'Prony', 'Chez les ponts, comme ça'),
+(4, 'Prony', 'Chez les ponts, comme ça');

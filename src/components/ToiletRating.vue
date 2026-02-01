@@ -106,5 +106,5 @@ async function submitRating() {
 </script>
 
 <style scoped>
-textarea { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+textarea { font-family: inherit; }
 </style>

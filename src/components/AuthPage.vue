@@ -265,7 +265,6 @@ function closeSuccessModal() {
   justify-content: center;
   min-height: 100vh;
   background-color: rgb(4, 32, 147);
-  font-family: 'Parchment MF', fantasy;
   padding: 20px;
   box-sizing: border-box;
   overflow-y: auto; /* allow scrolling when content is taller than viewport */
@@ -347,7 +346,6 @@ function closeSuccessModal() {
   box-sizing: border-box;
   color: #36395A;
   display: inline-flex;
-  font-family: "JetBrains Mono",monospace;
   height: 48px;
   justify-content: center;
   padding-left: 16px;
@@ -457,14 +455,14 @@ function closeSuccessModal() {
   font-size: 22px;
   margin: 0 0 20px 0;
   color: rgb(4, 32, 147);
-  font-family: 'Parchment MF', fantasy;
+  font-family: inherit;
 }
 
 .modal-content p {
   font-size: 16px;
   color: #333;
   margin: 0 0 30px 0;
-  font-family: 'Parchment MF', fantasy;
+  font-family: inherit;
 }
 
 @media (max-width: 480px) {

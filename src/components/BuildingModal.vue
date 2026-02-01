@@ -107,8 +107,8 @@ const recent = computed(() => recordsByType.value[selectedToiletType.value]?.sli
 async function fetchMessagesFile() {
   try {
     const { data, error } = await supabase
-      .from('poop_history')
-      .select('*')
+      .from('messages')
+      .select('code, floor_number, wing_name, message')
 
     // console.log(data)
     if (error || !data) {
@@ -319,14 +319,6 @@ watch(() => props.visible, (v) => {
 
 <style scoped>
 
-@font-face {
-  font-family: 'Parchment MF';
-  src: url('D:\ENSG\geocaca-pipi\geocaca_pipi\src\fonts\Parchment MF.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  color: white;
-}
-
 #modal {
   display: block; /* Changed from none to allow Vue to control visibility */
   position: fixed;
@@ -344,7 +336,6 @@ watch(() => props.visible, (v) => {
   max-height: 90vh;
   overflow-y: auto;
   animation: modalAppear 0.3s ease-out;
-  font-family: sans-serif;
 }
 
 @media (max-width: 768px) {
@@ -382,16 +373,15 @@ watch(() => props.visible, (v) => {
   font-size: 20px;
   font-weight: bold;
   border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 10px;
+  padding-bottom: 20px;
 }
 
 #modal-content {
   font-size: 20px;
-  line-height: 0.5;
+  line-height: 1.4;
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  font-family: 'Parchment MF', cursive;
+  gap: 3px;
 }
 
 /* Volets/Tabs pour les types de toilettes */
@@ -400,7 +390,6 @@ watch(() => props.visible, (v) => {
   gap: 8px;
   margin-bottom: 8px;
   flex-wrap: wrap;
-  font-family: "Parchment MF", cursive;
 }
 
 .tab-btn {
@@ -412,7 +401,6 @@ watch(() => props.visible, (v) => {
   cursor: pointer;
   font-size: 20px;
   transition: all 0.3s ease;
-  font-family: "Parchment MF", cursive;
 }
 
 .tab-btn:hover {
