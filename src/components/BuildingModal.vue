@@ -24,9 +24,22 @@ const messageText = ref('')
 const wingCodeToName = { A: 'Cassini', B: 'Laplace', C: 'Maupertuis' }
 const wingNameToCode = Object.fromEntries(Object.entries(wingCodeToName).map(([k, v]) => [v.toLowerCase(), k]))
 
-// Déterminer les types de toilettes selon l'étage
+// Déterminer les types de toilettes selon l'aile et l'étage
 const toiletTypes = computed(() => {
   const floorNum = props.floorData?.floorNumber
+  const wing = props.floorData?.wing
+  
+  // Pour Laplace: "Hommes" ou "Handicapés" pour tous les étages
+  if (wing === 'Laplace') {
+    return ['Hommes', 'Handicapés']
+  }
+  
+  // Pour Maupertuis et Cassini: "Hommes" ou "Femmes" pour tous les étages
+  if (wing === 'Maupertuis' || wing === 'Cassini') {
+    return ['Hommes', 'Femmes']
+  }
+  
+  // Par défaut (autres ailes): basé sur l'étage
   if (floorNum === 2 || floorNum === 4) {
     return ['Toilettes valides', 'Toilettes handicapées']
   } else {
